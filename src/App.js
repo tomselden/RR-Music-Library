@@ -1,9 +1,13 @@
 import './App.css';
-import { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
+import { Route, Routes, BrowserRouter } from 'react-router-dom'
+import AlbumView from './components/AlbumView'
+import ArtistView from './components/ArtistView'
 import Gallery from './components/Gallery'
-import SearchBar from './components/SearchBar'
+
 
 function App() {
+  const SearchBar = React.lazy(() => import('./components/SearchBar'))
   let [searchTerm, setSearchTerm] = useState('')
   let [data, setData] = useState([])
   let [message, setMessage] = useState('Search for Music!')
@@ -21,7 +25,7 @@ function App() {
         }
       }
       fetchData()
-  }
+    }
   }, [searchTerm])
 
   const handleSearch = (e, term) => {
@@ -31,9 +35,25 @@ function App() {
 
   return (
     <div className="App">
-      <SearchBar handleSearch={handleSearch} />
       {message}
-      <Gallery data={data} />
+      <BrowserRouter>
+        <Routes>
+          <Route exact path="/" element={
+            <div>
+              <Suspense fallback={<h1>Loading Search Bar...</h1>}>
+              <SearchBar handleSearch={handleSearch} />
+              </Suspense>
+              <Gallery data={data} />
+            </div>
+          }/>
+          <Route path="/album/:id" element={
+            <AlbumView/>
+          }/>
+          <Route path="/artist/:id" element={
+            <ArtistView/>
+          }/>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
